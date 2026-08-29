@@ -1,0 +1,8 @@
+# C/C++ compiled files
+*.o
+*.obj
+*.exe
+
+# Code::Blocks
+*.depend
+*.layout
