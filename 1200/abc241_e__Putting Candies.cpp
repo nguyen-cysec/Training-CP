@@ -30,7 +30,6 @@ void sol()
         return;
     }
     ll ans = prefix[cycleStart];
-
     k -= cycleStart;
     ans += (k / cycleLen) * cycleSum;
     ans += prefix[cycleStart + (k % cycleLen)] - prefix[cycleStart];
