@@ -32,7 +32,7 @@ void sol()
             ok[i][j] = 1;
             continue;
         }
-        for(int k = 0; k < 3; k++)
+        for(int k = 0; k <= 3; k++)
         {
             if(in(i + dx[k], j + dy[k]) && s[i + dx[k]][j + dy[k]] == '#') rank[i][j] = 1;
         }
@@ -49,6 +49,7 @@ void sol()
                 {
                     int cnt = 1;
                     queue<pii> q;
+                    vector<pii> vt;
                     q.push({i, j});
                     ok[i][j] = 1;
                     while(!q.empty())
@@ -56,16 +57,20 @@ void sol()
                         auto [x, y] = q.front();
                         q.pop();
                         if(rank[x][y] == 1) continue;
-                        for(int k = 0; k < 3; k++)
+                        for(int k = 0; k <= 3; k++)
                         {
                             if(in(x + dx[k], y + dy[k]) && !ok[x + dx[k]][y + dy[k]])
                             {
                                 cnt++;
                                 q.push({x + dx[k], y + dy[k]});
-                                if(rank[x + dx[k]][y + dy[k]] == 2) ok[x + dx[k]][y + dy[k]] = 1;
+                                ok[x + dx[k]][y + dy[k]] = 1;
+                                if(rank[x + dx[k]][y + dy[k]] == 1) vt.push_back({x + dx[k], y + dy[k]});
                             }
                         }
+
                     }
+                    for(auto[u, v]: vt)
+                    {ok[u][v] = 0;}
                     mx = max(mx, cnt);
                 }
                 else mx = max(mx, 1);
