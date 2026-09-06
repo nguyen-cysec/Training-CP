@@ -3,82 +3,85 @@
 #define oo 1000000000
 #define plli pair<long long, int>
 #define pii pair<int, int>
+#define fi first
+#define se second
 using namespace std;
 using ll = long long;
 using ull = unsigned long long;
-int n;
-bool st[4 * MAXN];
-bool ok[MAXN];
-void build(int l, int r, int id)
+struct Node
+{
+    int sum;
+    int min_pref;
+};
+Node st[4 * MAXN];
+int n, q;
+string s;
+Node merge(Node left, Node right)
+{
+    Node res;
+    res.sum = left.sum + right.sum;
+    res.min_pref = min(left.min_pref, left.sum + right.min_pref);
+    return res;
+}
+void build(int id, int l, int r)
 {
     if(l == r)
     {
-        st[id] = ok[l];
+        if(s[l] == 'A') st[id] = {1, 1};
+        else st[id] = {-1, -1};
         return;
     }
-    else
-    {
-        int mid = (l + r) >> 1;
-        build(l, mid, id * 2); build(mid + 1, r, id * 2 + 1);
-        st[id] = max(st[id * 2], st[id * 2 + 1]);
-    }
+    int mid = (l + r) / 2;
+    build(id * 2, l, mid);
+    build(id * 2 + 1, mid + 1, r);
+    st[id] = merge(st[id * 2], st[id * 2 + 1]);
 }
-void update(int l, int r, int id, int u, bool val)
+
+void update(int id, int l, int r, int pos, char c)
 {
-    if(r < u || l > u) return;
-    if(l == r && r == u)
+    if(l == r)
     {
-        st[id] == val;
+        if(c == 'A') st[id] = {1, 1};
+        else st[id] = {-1, -1};
         return;
     }
-    int mid = (l + r ) >> 1;
-    update(l, mid, id * 2, u, val);
-    update(mid + 1, r, id * 2 + 1, u, val);
-    st[id] = max(st[id * 2], st[id * 2 + 1]);
-    return;
+    int mid = (l + r) / 2;
+    if(pos <= mid) update(id * 2, l, mid, pos, c);
+    else update(id * 2 + 1, mid + 1, r, pos, c);
+    st[id] = merge(st[id * 2], st[id * 2 + 1]);
 }
-bool get(int l, int r, int id, int u, int v)
+Node get(int id, int l, int r, int u, int v)
 {
-    if(l > v || r < u) return 0;
-    else if(u <= l && r <= v) return st[id];
-    int mid = (l + r) >> 1;
-    return max(get(l, mid, id * 2, u, v), get(mid + 1, r, id * 2 + 1, u, v));
+    if(v < l || r < u) return {0, oo};
+    if(u <= l && r <= v) return st[id];
+    int mid = (l + r) / 2;
+    Node left = get(id * 2, l, mid, u, v);
+    Node right = get(id * 2 + 1, mid + 1, r, u, v);
+    if(left.min_pref == oo) return right;
+    if(right.min_pref == oo) return left;
+    return merge(left, right);
 }
 void sol()
 {
-    cin >> n;
-    string s; cin >> s;
-    for(int i = 1; i < n; i++)
-    {
-        if(s[i] == s[i - 1] && s[i] == 'B') ok[i] = 1;
-    }
-    build(0, n - 1, 1);
-    int q; cin >> q;
-    int opt, l, r, i;
-    char c;
+    cin >> n >> s >> q;
+    build(1, 0, n - 1);
     while(q--)
     {
-        cin >> opt;
-        if(opt == 1)
+        int type;
+        cin >> type;
+        if(type == 1)
         {
+            int i;
+            char c;
             cin >> i >> c;
-            i--;
-            s[i] = c;
-            if(c == 'B')
-            {
-                if(i) update(0, n - 1, 1, i, s[i - 1] == 'B');
-                if(i < n - 1) update(0, n - 1, 1, i + 1, s[i + 1] == 'B');
-            }
-            else
-            {
-                if(i) update(0, n - 1, 1, i, 0);
-                if(i < n - 1) update(0, n - 1, 1, i + 1, 0);
-            }
+            update(1, 0, n - 1, i - 1, c);
         }
         else
         {
+            int l, r;
             cin >> l >> r;
-            cout << (get(0, n - 1, 1, l - 1, r - 1) ? "Yes" : "No") << "\n";
+            Node res = get(1, 0, n - 1, l - 1, r - 1);
+            cout << (res.min_pref >= 0 ? "Yes" : "No") << "\n";
         }
     }
 }
@@ -86,4 +89,5 @@ int main()
 {
     ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);
     sol();
+    return 0;
 }
